@@ -6,7 +6,9 @@ mfpatbc is a Python module to create input data for a phase-averaged tidal bound
 
 Supported versions of MODFLOW are MODFLOW-2005, MODFLOW-NWT, SEAWAT, and MODFLOW 6 (constant density). The module defines stress period based input data for the General Head Boundary (GHB) and the Drainage Boundary (Package) as required for the PA-TBC.
 
-For use with SEAWAT, the GHB input for the Source and Sink Mixing (SSM) package of MT3DMS can be defined. The modul also provides functions to write GHB and DRN input files with SEAWAT auxiliary variables IGHBELEV and IDRNELEV, which is not supported by flopy yet. 
+For use with SEAWAT, the GHB input for the Source and Sink Mixing (SSM) package of MT3DMS can be defined. The modul also provides functions to write GHB and DRN input files with SEAWAT auxiliary variables IGHBELEV and IDRNELEV, which is not supported by flopy yet.
+
+Should you find any error or have ideas for improvements, I would be very grateful if you let me know in 'Issues' or 'Discussions'.
 
 ## Installation
 
@@ -26,6 +28,9 @@ help(mfpatbc.PATBC)
 ?mfpatbc.PATBC
 ??mfpatbc.PATBC
 ```
+
+## Getting started
+The folder 'examples' provides Jupyter Notebooks showcasing the use of the module for MODFLOW-2005, SEAWAT, and MODFLOW 6 with flopy.
 
 ## How to cite
 Haehnel, Patrick (2020). mfpatbc v1.0.0 [Software] URL: https://github.com/phaehnel/mfpatbc
