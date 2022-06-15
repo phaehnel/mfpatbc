@@ -20,9 +20,10 @@ Place it:
 ```python
 >>> sys.path.append('path/to/your/directory')
 ```
+Or any other, more elegant method you may know. 
 
 ## Documentation
-Is provided within the methods, functions , and classes as docstring. Access e.g. via
+Is provided within the methods, functions, and classes as docstring. Access e.g. via
 ```python
 help(mfpatbc.PATBC)
 ?mfpatbc.PATBC
