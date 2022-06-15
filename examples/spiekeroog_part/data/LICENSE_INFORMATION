@@ -1,0 +1,15 @@
+'spk_part_dem.tif' 
+originates from the EasyGSH-DB project (https://mdi-de.baw.de/easygsh/)
+License information: https://datenrepository.baw.de/trefferanzeige?cmd=doShowDocument&docuuid=590135db-1776-450d-9fe3-ac6484cf64aa&plugid=/ingrid-group:iplug-ige-datenrepo
+The data is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0) 
+https://creativecommons.org/licenses/by/4.0/
+
+
+'tide_WW_avg30mins_2012-11-01_to_2014-11-30.txt' and
+'tide_WW_phaseavg_2012-11-01_to_2014-11-30.txt'
+are derived from the WSV data from PEGELONLINE.
+The tide data included here is processed from the original 1-min time series received from the WSV.
+License information: https://www.govdata.de/web/guest/suchen/-/details/pegelonline
+The data is licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0) https://creativecommons.org/licenses/by/4.0/
+
+All other files in this folder were derived from the aforementioned data files by the author of this repository.
