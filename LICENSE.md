@@ -6,7 +6,7 @@ This does explicitly exclude:
 * The file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv' which originates from 10.5281/zenodo.6645464 and is associated with the publication 
 **Haehnel et al. (202X)**, which are both licensed under Creative Commons Attribution 4.0 International License (CC BY 4.0). Therefore,
 no requirement exists to cite the Python module 'mfpatbc', but you are required to cite the journal article **Haehnel et al. (202X)** when
-using the module 'mfpatbc' to create a phase-averaged tidal boundary condition that relies on the file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv'.
+using the module 'mfpatbc' to create a phase-averaged tidal boundary condition that relies on the file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv'. I.e. when the empricial correction function described by **Haehnel et al. (202X)** is used.
 * Any third-party data or software made available in the folders 'bin' and 'examples'. Their according license status is outlined there.
 
 ## CC0 1.0 Summary
