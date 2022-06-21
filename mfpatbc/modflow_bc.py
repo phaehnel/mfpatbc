@@ -25,6 +25,9 @@ class PATBC():
     
     The module allows to create respective output for MODFLOW-2005, SEAWAT and
     MODFLOW6. Implementation is only done for structured grid in MODFLOW6.
+    For MODFLOW-2005, the module is also able to caluculate boundary heads as 
+    required by the Seawater Intrusion Package (SWI2) (Bakker et al., 2013). See
+    attribute version.
     
     Hand all parameters in unit of the MODFLOW model to ensure correct 
     calculation of vertical conductance for the GHB and DRN.
@@ -64,6 +67,11 @@ class PATBC():
         (default is None). If not provided all cells will be allowed to hold
         a phase-averaged tidal boundary condition and each cell is assigned either
         a GHB or a DRN.
+    version : str, optional
+        Define version of of MODFLOW (default is None). Should only be defined
+        by user if MODFLOW-2005 is used with SWI2 package (seawater intrusion)
+        package. Then set to 'swi2'. This allows calculation of freshwater heads
+        as required by SWI2.
     rho_fresh : float, optional
         Density of fresh water (default is 1000 kg/m³). Required for SEAWAT
     rho_salt : float, optional
@@ -171,6 +179,14 @@ class PATBC():
     >>> drn = flopy.modflow.ModflowDrn(m, stress_period_data = drnspd, 
                                        option = ['NOPRINT'])
 
+
+    **Sharp-interface simulations with SWI2 package**
+    
+    Same as for constant density simulations. Only requires definition of 
+    attribute version = 'swi2' in mfpatbc.PATBC() object
+    which enables calculation of freshwater heads for the GHB.
+    
+    
     **Variable density simulations**
     
     Setup flopy model with all required packages.
@@ -276,10 +292,23 @@ class PATBC():
     Fresh water heads of the GHB are calculated with method get_freshwater_heads 
     assuming that the elevation head (z) (Post et al., 2007; eq. 6) is the
     reservoir bottom, i.e. surface elevation.
+    
+    **Sharp interface simulations with SWI2 package**
+    
+    The freshwater heads of the GHB in the PA-TBC are calculated
+    at the top elevation of the uppermost active model layer for 
+    each row and column combination. This definition meets the requirement of 
+    the SWI2 package for head definitions in head-dependent boundary conditions
+    (Bakker et al., 2013; p. 40).
 
 
     References
     -----
+    Bakker, M., Schaars, F., Hughes, J. D., Langevin, C. D., 
+    & Dausmann, A. M. (2013). Documentation of the Seawater Intrusion (SWI2) 
+    Package for MODFLOW (Techniques and Methods No. 6-A46). 
+    Reston: U.S. Geological Survey. https://doi.org/10.3133/tm6A46
+    
     Mulligan, A. E., Langevin, C., & Post, V. E. A. (2011). 
     Tidal Boundary Conditions in SEAWAT. Ground Water, 49(6), 866–879. 
     https://doi.org/10.1111/j.1745-6584.2010.00788.x
@@ -295,10 +324,10 @@ class PATBC():
     """
     
     def __init__(self, m, hs, A, T, hk, vka, sy, z_D, slope, idx_top_layer = None,
-                 allow = None, rho_fresh = 1000, rho_salt = 1025):
+                 allow = None, version = None, rho_fresh = 1000, rho_salt = 1025):
         
         # Assign attributes
-        self.version = m.version
+        self.version = m.version if version is None else version
         self.top = m.dis.top.array
         self.botm = m.dis.botm.array
         self.nlay = self.botm.shape[0]
@@ -421,8 +450,8 @@ class PATBC():
             self.slope, lm
         )
         
-        # If SEAWAT calculate freswater heads
-        if self.version == 'seawat':
+        # If SEAWAT or MODFLOW-2005 with SWI2 calculate freswater heads
+        if (self.version == 'seawat') or (self.version == 'swi2'):
             self.hghb_fresh = self.get_freshwater_heads()
         else:
             self.hghb_fresh = self.hghb
