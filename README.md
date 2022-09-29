@@ -1,5 +1,5 @@
 # mfpatbc
-### Version 1.1.0
+### Version 1.0.0
 
 ## Introduction
 mfpatbc is a Python module to create input data for a phase-averaged tidal boundary (PA-TBC) condition for MODFLOW models created with [flopy](https://github.com/modflowpy/flopy). The PA-TBC is explained in detail in **Haehnel et al. (202X)**.
