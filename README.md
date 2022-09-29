@@ -34,7 +34,7 @@ help(mfpatbc.PATBC)
 The folder 'examples' provides Jupyter Notebooks showcasing the use of the module for MODFLOW-2005, SEAWAT, and MODFLOW 6 with flopy.
 
 ## How to cite
-Haehnel, Patrick (2020). mfpatbc v1.0.0 [Software] URL: https://github.com/phaehnel/mfpatbc
+Haehnel, Patrick (2020). mfpatbc v1.1.0 [Software] URL: https://github.com/phaehnel/mfpatbc
 
 ## References
 **Haehnel et al. (202X)**
