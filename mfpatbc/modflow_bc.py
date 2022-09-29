@@ -194,10 +194,11 @@ class PATBC():
     >>> swt = flopy.seawat.Seawat(...)
     
     Loop through stress periods. Create PATBC object for every stress period
-    and write stress period data for GHB and DRN to dictionary. Create dummy
-    objects for GHB and DRN in flopy, as auxiliary variables IGHBELEV and
-    IDRNELEV for SEAWAT are not supported by flopy. Dummy objects will make
-    flopy write GHB and DRN to name file. Boundary heads of GHB are calculated
+    and write stress period data for GHB and DRN to dictionary. 
+    add auxiliary variables 'IGHBELEV' and 'IDRNELEV' as options, respectively.
+    dtypes for each column of the arrays in the dictonaries need to be passed
+    to the flopy object. Otherwise an error is thrown.
+    Boundary heads of GHB are calculated
     as freshwater heads, assuming the density set for the GHB reservior.
     
     >>> ghbspd = {}
@@ -206,8 +207,10 @@ class PATBC():
     >>>     patbc = mfpatbc.PATBC(...)
     >>>     ghbspd[k] = patbc.get_ghb_stress_period_data()
     >>>     drnspd[k] = patbc.get_drn_stress_period_data()
-    >>> ghb = flopy.modflow.ModflowGhb(swt, stress_period_data = {0: [0, 0, 0, 0, 0]})
-    >>> drn = flopy.modflow.ModflowDrn(swt, stress_period_data = {0: [0, 0, 0, 0, 0]})
+    >>> ghb = flopy.modflow.ModflowGhb(swt, stress_period_data = ghbspd, 
+                                       options = ['NOPRINT', 'IGHBELEV'], dtype = ghbspd[0].dtype)
+    >>> drn = flopy.modflow.ModflowDrn(swt, stress_period_data = drnspd,
+                                       options = ['NOPRINT', 'IDRNELEV'], dtype = drnspd[0].dtype)
     
     Create all MT3DMS packages and SEAWAT VDF package.
     For Source and Sink Mixing package (SSM) define GHB concentrations.
@@ -220,24 +223,6 @@ class PATBC():
     
     >>> ssmghbspd = patbc.get_ssm_stress_period_data(conc_ghb = 35)
     >>> ssm = flopy.mt3d.Mt3dSsm(swt, stress_period_data = ssmghbspd, mxss = ...)
-    
-    Write input files. First remove all files in model workspace, otherwise some
-    strange behavior with MT3DMS output binary files may occure. Write all 
-    packages but GHB and DRN. This saves time for simulations with many stress
-    periods. Write GHB and DRN input files separately to allow inclusion of 
-    auxiliary variables of SEAWAT.
-    
-    >>> filenames = glob.glob(swt.model_ws + '/*')
-    >>> for f in filenames:
-    >>>     try:
-    >>>         os.remove(f)
-    >>>     except:
-    >>>         print(f + ' could not be removed.')
-    >>> packages = swt.get_package_list()
-    >>> packages = [name for name in packages if (name != 'GHB') & (name != 'DRN')]
-    >>> swt.write_input(SelPackList = packages)
-    >>> mfpatbc.write_ghb(swt, spd_ghb, options = ['NOPRINT', 'IGHBELEV'])
-    >>> mfpatbc.write_drn(swt, spd_drn, options = ['NOPRINT', 'IDRNELEV'])
     
     
     Notes
@@ -411,7 +396,7 @@ class PATBC():
             drn_stress_period_data = np.rec.fromrecords(
                 drn_stress_period_data,
                 dtype = [('k', '<i8'), ('i', '<i8'), ('j', '<i8'),
-                         ('stage', '<f4'), ('cond', '<f4'), ('zghb', '<f4')]
+                         ('elev', '<f4'), ('cond', '<f4'), ('zdrn', '<f4')]
             )
         else:
             drn_stress_period_data = list(zip(lay, row, col, stage, cond))
@@ -476,7 +461,7 @@ class PATBC():
             ghb_stress_period_data = np.rec.fromrecords(
                 ghb_stress_period_data,
                 dtype = [('k', '<i8'), ('i', '<i8'), ('j', '<i8'),
-                         ('stage', '<f4'), ('cond', '<f4'), ('zghb', '<f4')]
+                         ('bhead', '<f4'), ('cond', '<f4'), ('zghb', '<f4')]
             )
         else:
             ghb_stress_period_data = list(zip(lay, row, col, stage, cond))
@@ -809,232 +794,6 @@ def get_options_string(options, precision = None):
             options_str += f' {value:{precision}s}'
     
     return options_str
-    
-
-def write_drn(m, stress_period_data, mxactb = None, idrncb = 0, options = None,
-              filename = None, filepath = None, verbose = False, 
-              precision = {'cell': 9, 'data': 15}, newline = '\n'):
-    """
-    Write Drainage Boundary Package (DRN) input file based on stress period data 
-    defined e.g. with method PATBC.get_drn_stress_period_data(). 
-    
-    This function allows to write auxiliar variables to the stress period data
-    input of the DRN input file. This is, at least for SEAWAT auxiliar variable 
-    IDRNELEV, not possible using the flopy write method for DRN.
-    
-    See section 'Examples' in the documentation of mfpatbc.PATBC() for the 
-    concept on how to use this function.
-    
-    So far, only supports writing of stress_period_data dictionaries in 
-    format required for flopy.modflow.ModflowDrn (MODFLOW-2005 or SEAWAT).
-    
-    Check function write_stress_period_data for details how stress period data
-    is written to the input file.
-    
-    Input data must meet requirements defined for DRN input in Harbaugh (2005).
-
-    Parameters
-    ----------
-    m : flopy model object
-        Either MODFLOW-2005 or SEAWAT model class object.
-    stress_period_data : dict
-        Stress period data for DRN. Format of dictionary entries is 
-        (layer, row, column, stage, conductance, AUX), where AUX is any
-        number of auxiliary variables defined in attribute options.
-    mxactb : int, optional
-        Maximum number of DRN cells required in simulation. 
-        If not provided number is determined from stress period data by function
-        get_maxmimum_number_bc_cells. The default is None.
-    idrncb : int, optional
-        Flag determining if cell-by-cell flow term will be written to output. 
-        The default is 0.
-    options : str or list of strs, optional
-        Names of auxiliar variables to write to MODFLOW boundary condition
-        input file. Either provide list of strings, which are then formated
-        accoring to precision['cell'], or provide string which can be written as
-        is to DRN input file. The default is None.
-    filename : str, optional
-        Name of the DRN input file. If not provided, modelname of the flopy
-        model object is used. The default is None.
-    filepath : TYPE, optional
-        Directory to write DRN input file. If not provided, model workspace of
-        the flopy model object is used. If defined make sure that the directory 
-        is defined accordingly in the name file. The default is None.
-    verbose : bool, optional
-        If True, writes information on progress to console. The default is False.
-    precision : dict, optional
-        precision for cell and data information, when writing DRN input file. 
-        'cell' refers to the layer, row, and column information, 
-        'data' refers to stage, conductivity and auxiliary variables. 
-        The default is {'cell': 9, 'data': 15}.
-    newline : str, optional
-        Newline command. Should typically not be changed.
-        
-    Returns
-    -------
-    None.
-    
-    References
-    ----------
-    Harbaugh, A. W. (2005). MODFLOW-2005, The U.S. Geological Survey Modular 
-    Ground-Water Model—the Ground-Water Flow Process (Techniques and Methods 
-    No. 6-A16). Reston: U.S. Geological Survey.
-    
-    """
-    
-    # Define file name
-    filename = define_filename(m, filename, 'drn')
-    
-    # Set file location
-    if filepath is None:
-        filepath = m.model_ws
-    
-    # Set maximum number of GHB boundary cells
-    if mxactb is None:
-        mxactb = get_maximum_number_bc_cells(stress_period_data)
-        
-    # Define options string
-    options_str = '' if options is None else\
-        get_options_string(options, precision['cell'])
-        
-    if verbose:
-        print('Start writing DRN input file\n')
-        
-    # Open file
-    f = open(os.path.join(filepath, filename), 'w')
-    
-    # Line numbering according to Harbaugh (2005)
-    # Line 0
-    f.write(f'# DRN package, generated by mfpatbc version {mfpatbc.__version__}' +
-            f'{newline}')
-    
-    # Line 2
-    f.write(
-        f' {mxactb:{precision["cell"]}d} {idrncb:{precision["cell"]}d}' +\
-        f'{options_str}{newline}'
-    )
-    
-    # Lines 5 and 6
-    write_stress_period_data(f, m.nper, stress_period_data, precision, newline,
-                             verbose)
-    
-    f.close() 
-    
-    if verbose:
-        print('Finished writing DRN input file\n')
- 
-      
-def write_ghb(m, stress_period_data, mxactb = None, ighbcb = 0, options = None,
-              filename = None, filepath = None, verbose = False, 
-              precision = {'cell': 9, 'data': 15}, newline = '\n'):
-    """
-    Write General Head Boundary Package (GHB) input file based on stress period 
-    data defined e.g. with method PATBC.get_ghb_stress_period_data(). 
-    
-    This function allows to write auxiliar variables to the stress period data
-    input of the GHB input file. This is, at least for SEAWAT auxiliar variable 
-    IGHBELEV, not possible using the flopy write method for DRN.
-    
-    See section 'Examples' in the documentation of mfpatbc.PATBC() for the 
-    concept on how to use this function.
-    
-    So far, only supports writing of stress_period_data dictionaries in 
-    format required for flopy.modflow.ModflowGhb (MODFLOW-2005 or SEAWAT).
-    
-    Check function write_stress_period_data for details how stress period data
-    is written to the input file.
-    
-    Input data must meet requirements defined for GHB input in Harbaugh (2005).
-
-    Parameters
-    ----------
-    m : flopy model object
-        Either MODFLOW-2005 or SEAWAT model class object.
-    stress_period_data : dict
-        Stress period data for GHB. Format of dictionary entries is 
-        (layer, row, column, stage, conductance, AUX), where AUX is any
-        number of auxiliary variables defined in attribute options.
-    mxactb : int, optional
-        Maximum number of GHB cells required in simulation. 
-        If not provided number is determined from stress period data by function
-        get_maxmimum_number_bc_cells. The default is None.
-    ighbcb : int, optional
-        Flag determining if cell-by-cell flow term will be written to output. 
-        The default is 0.
-    options : str or list of strs, optional
-        Names of auxiliar variables to write to MODFLOW boundary condition
-        input file. Either provide list of strings, which are then formated
-        accoring to precision['cell'], or provide string which can be written as
-        is to GHB input file. The default is None.
-    filename : str, optional
-        Name of the GHB input file. If not provided, modelname of the flopy
-        model object is used. The default is None.
-    filepath : TYPE, optional
-        Directory to write GHB input file. If not provided, model workspace of
-        the flopy model object is used. If defined make sure that the directory 
-        is defined accordingly in the name file. The default is None.
-    verbose : bool, optional
-        If True, writes information on progress to console. The default is False.
-    precision : dict, optional
-        precision for cell and data information, when writing GHB input file. 
-        'cell' refers to the layer, row, and column information, 
-        'data' refers to stage, conductivity and auxiliary variables. 
-        The default is {'cell': 9, 'data': 15}.
-    newline : str, optional
-        Newline command. Should typically not be changed.
-        
-    Returns
-    -------
-    None.
-    
-    References
-    ----------
-    Harbaugh, A. W. (2005). MODFLOW-2005, The U.S. Geological Survey Modular 
-    Ground-Water Model—the Ground-Water Flow Process (Techniques and Methods 
-    No. 6-A16). Reston: U.S. Geological Survey.
-    
-    """
-    
-    # Define file name
-    filename = define_filename(m, filename, 'ghb')
-    
-    # Set file location
-    if filepath is None:
-        filepath = m.model_ws
-    
-    # Set maximum number of GHB boundary cells
-    if mxactb is None:
-        mxactb = get_maximum_number_bc_cells(stress_period_data)
-        
-    # Define options string
-    options_str = '' if options is None else\
-        get_options_string(options, precision['cell'])
-        
-    if verbose:
-        print('Start writing GHB input file\n')
-        
-    # Open file
-    f = open(os.path.join(filepath, filename), 'w')
-    
-    # Line numbering according to Harbaugh (2005)
-    # Line 0
-    f.write(f'# GHB package, generated by mfpatbc version {mfpatbc.__version__}' +
-            f'{newline}')
-    
-    # Line 2
-    f.write(
-        f' {mxactb:{precision["cell"]}d} {ighbcb:{precision["cell"]}d}' +\
-        f'{options_str}{newline}'
-    )
-    
-    # Lines 5 and 6
-    write_stress_period_data(f, m.nper, stress_period_data, precision, newline,
-                             verbose)
-    
-    f.close()
-    
-    if verbose:
-        print('Finished writing GHB input file\n')
     
     
 def write_stress_period_data(f, nper, stress_period_data, precision, newline,

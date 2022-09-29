@@ -15,7 +15,7 @@ path_module = __file__[:-11]
 
 
 major = 1
-minor = 0
+minor = 1
 micro = 0
 __version__ = f'{major}.{minor}.{micro}'
 
