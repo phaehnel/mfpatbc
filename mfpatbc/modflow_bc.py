@@ -5,7 +5,6 @@
 2022-05-18
 """
 
-import os
 import numpy as np
 import pandas as pd
 import flopy
@@ -73,9 +72,14 @@ class PATBC():
         package. Then set to 'swi2'. This allows calculation of freshwater heads
         as required by SWI2.
     rho_fresh : float, optional
-        Density of fresh water (default is 1000 kg/m³). Required for SEAWAT
+        Density of freshwater (default is 1000 kg/m³). Required for SWI2
     rho_salt : float, optional
-        Density of salt water (default is 1025 kg/m³). Required for SEAWAT
+        Density of salt water (default is 1025 kg/m³). Required for SWI2
+    set_ghbdens : float, optional
+        Density to set GHBDENS as auxiliar variable in the GHB package. Required for 
+        SEAWAT. If float value is set, pointwater heads are written to the GHB
+        package. If None is defined, GHBDENS is not written to the GHB package
+        and default behaviour of SEAWAT is triggered.
     
     
     Attributes (derived from flopy model object)
@@ -131,7 +135,7 @@ class PATBC():
         dictionary of the GHB package for the given stress period.
     get_freshwater_heads :
         Hands back freshwater heads calculated according to equation 6 in 
-        Post et al. (2007). Assumes GHB reservoir with density rho_salt and
+        Post et al. (2007). Assumes reservoir with density rho_salt and
         bottom of reservior at surface elevation (aquifer-ocean interface).
     get_ssm_stress_period_data :
         Hands back numpy.array required as input for the stress_period_data
@@ -198,8 +202,7 @@ class PATBC():
     add auxiliary variables 'IGHBELEV' and 'IDRNELEV' as options, respectively.
     dtypes for each column of the arrays in the dictonaries need to be passed
     to the flopy object. Otherwise an error is thrown.
-    Boundary heads of GHB are calculated
-    as freshwater heads, assuming the density set for the GHB reservior.
+    Boundary heads of GHB are set as pointwater heads.
     
     >>> ghbspd = {}
     >>> drnspd = {}
@@ -208,7 +211,8 @@ class PATBC():
     >>>     ghbspd[k] = patbc.get_ghb_stress_period_data()
     >>>     drnspd[k] = patbc.get_drn_stress_period_data()
     >>> ghb = flopy.modflow.ModflowGhb(swt, stress_period_data = ghbspd, 
-                                       options = ['NOPRINT', 'IGHBELEV'], dtype = ghbspd[0].dtype)
+                                       options = ['NOPRINT', 'IGHBELEV', 'GHBDENS'], 
+                                       dtype = ghbspd[0].dtype)
     >>> drn = flopy.modflow.ModflowDrn(swt, stress_period_data = drnspd,
                                        options = ['NOPRINT', 'IDRNELEV'], dtype = drnspd[0].dtype)
     
@@ -264,19 +268,12 @@ class PATBC():
     **Variable density simulations with SEAWAT**
     
     GHB and DRN boundary conditions are defined equivalently to their definition
-    in Mulligan et al. (2011) (e.g. Figure 1). Fresh water heads for boundary stage
-    of GHB are retrieved by method get_freshwater_heads, but the check for cells
-    being assigned a GHB is done with the point water head (which assumes 
-    density rho_salt). The boundary stage of DRN is not modified compared to 
-    constant density simulations.
+    in Mulligan et al. (2011) (e.g. Figure 1).
     
     The bottom of the reservior of GHB and the bottom elevation of the drain
     (SEAWAT auxiliar variables IGHBELEV and IDRNELEV) are set to respective 
     cell values of attribute z (surface elevation, aquifer-ocean interface).
     
-    Fresh water heads of the GHB are calculated with method get_freshwater_heads 
-    assuming that the elevation head (z) (Post et al., 2007; eq. 6) is the
-    reservoir bottom, i.e. surface elevation.
     
     **Sharp interface simulations with SWI2 package**
     
@@ -309,7 +306,8 @@ class PATBC():
     """
     
     def __init__(self, m, hs, A, T, hk, vka, sy, z_D, slope, idx_top_layer = None,
-                 allow = None, version = None, rho_fresh = 1000, rho_salt = 1025):
+                 allow = None, version = None, rho_fresh = 1000, rho_salt = 1025,
+                 set_ghbdens = 1025):
         
         # Assign attributes
         self.version = m.version if version is None else version
@@ -355,8 +353,10 @@ class PATBC():
         self.slope = self.make_array(self.slope)
         
         # For variable density simulations define density
-        self.rho_fresh = 1000
-        self.rho_salt = 1025
+        self.rho_fresh = rho_fresh
+        self.rho_salt = rho_salt
+        
+        self.set_ghbdens = set_ghbdens
         
         # Calculations required
         self.vertical_conductance = self.get_vertical_conductance()
@@ -436,10 +436,13 @@ class PATBC():
         )
         
         # If SEAWAT or MODFLOW-2005 with SWI2 calculate freswater heads
-        if (self.version == 'seawat') or (self.version == 'swi2'):
+        if (self.version == 'swi2'):
             self.hghb_fresh = self.get_freshwater_heads()
         else:
             self.hghb_fresh = self.hghb
+            # Maybe a bit misleading when SEAWAT is used. Then this is also
+            # pointwater head, but this setting of hghb_fresh facilitates 
+            # handling later on for SWI2 which really uses freshwater heads.
         
         # Find GHB cells
         is_ghb = (self.hghb > self.z) & self.allow & self.active
@@ -457,12 +460,26 @@ class PATBC():
         elif self.version == 'seawat':
             # Get surface elevation of the boundary condition
             zghb = self.z[row, col]
-            ghb_stress_period_data = list(zip(lay, row, col, stage, cond, zghb))
-            ghb_stress_period_data = np.rec.fromrecords(
-                ghb_stress_period_data,
-                dtype = [('k', '<i8'), ('i', '<i8'), ('j', '<i8'),
-                         ('bhead', '<f4'), ('cond', '<f4'), ('zghb', '<f4')]
-            )
+            
+            if self.set_ghbdens is None:
+                ghb_stress_period_data = list(zip(lay, row, col, stage, cond, zghb))
+                ghb_stress_period_data = np.rec.fromrecords(
+                    ghb_stress_period_data,
+                    dtype = [('k', '<i8'), ('i', '<i8'), ('j', '<i8'),
+                             ('bhead', '<f4'), ('cond', '<f4'), ('zghb', '<f4')]
+                )
+            else:
+                ghbdens = np.repeat(self.set_ghbdens, row.size)
+                ghb_stress_period_data = list(zip(
+                    lay, row, col, stage, cond, zghb, ghbdens
+                ))
+                ghb_stress_period_data = np.rec.fromrecords(
+                    ghb_stress_period_data,
+                    dtype = [('k', '<i8'), ('i', '<i8'), ('j', '<i8'),
+                             ('bhead', '<f4'), ('cond', '<f4'), 
+                             ('zghb', '<f4'), ('ghbdens', '<f4')]
+                )
+            
         else:
             ghb_stress_period_data = list(zip(lay, row, col, stage, cond))
             ghb_stress_period_data = np.rec.fromrecords(
@@ -476,7 +493,7 @@ class PATBC():
     
     def get_freshwater_heads(self):
         """
-        Calculates fresh water heads according to equation 6 from 
+        Calculates freshwater heads according to equation 6 from 
         Post et al. (2007). 
         
         Assumes that GHB reservoir has salt water density, and that the bottom
@@ -485,7 +502,7 @@ class PATBC():
         Returns
         -------
         hghb_fresh : array of floats (nrow, ncol)
-            fresh water heads.
+            freshwater heads.
             
         References
         ----------
