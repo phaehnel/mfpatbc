@@ -4,7 +4,7 @@
 ## Introduction
 mfpatbc is a Python module to create input data for a phase-averaged tidal boundary (PA-TBC) condition for MODFLOW models created with [flopy](https://github.com/modflowpy/flopy). The PA-TBC is explained in detail in **Haehnel et al. (202X)**.
 
-Supported versions of MODFLOW are MODFLOW-2005, MODFLOW-NWT, SEAWAT, and MODFLOW 6 (constant density). The module defines stress period based input data for the General Head Boundary (GHB) and the Drainage Boundary (Package) as required for the PA-TBC.
+Supported versions of MODFLOW are MODFLOW-2005, MODFLOW-NWT, SEAWAT, and MODFLOW 6 (constant density). The module defines stress period based input data for the General Head Boundary (GHB) and the Drainage Boundary (Package) as required for the PA-TBC. For MODFLOW-2005, defining freshwater heads for the GHB package as required by the Seawater Intrusion Package (SWI2) is supported.
 
 For use with SEAWAT, the GHB input for the Source and Sink Mixing (SSM) package of MT3DMS can be defined.
 
