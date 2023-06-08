@@ -11,7 +11,7 @@ For use with SEAWAT, the GHB input for the Source and Sink Mixing (SSM) package 
 Should you find any error or have ideas for improvements, I would be very grateful if you let me know in 'Issues' or 'Discussions'.
 
 ## Installation
-
+### Python module 
 Please download the source code.
 Place it: 
 * in a directory where Python looks for modules (sys.path)
@@ -21,6 +21,9 @@ Place it:
 >>> sys.path.append('path/to/your/directory')
 ```
 Or any other, more elegant method you may know. 
+
+### Compiling Fortran code
+The module has a functionality to write GHB and DRN input files independent of flopy (mfpatbc.write_ghb() and mfpatbc.write_drn()) using some Fortran code to write the stress period data. The looping through the stress periods while writing input files is still in Python but the writing of the cell information per stress period is outsourced to Fortran. This is especially time-saving for models with many PA-TBC cells and/or many stress periods. Depending on the model the runtime savings can be around 50 % compared to the flopy writing utilities for the respective input files.
 
 ## Documentation
 Is provided within the methods, functions, and classes as docstring. Access e.g. via
