@@ -25,6 +25,17 @@ Or any other, more elegant method you may know.
 ### Compiling Fortran code
 The module has a functionality to write GHB and DRN input files independent of flopy (mfpatbc.write_ghb() and mfpatbc.write_drn()) using some Fortran code to write the stress period data. The looping through the stress periods while writing input files is still in Python but the writing of the cell information per stress period is outsourced to Fortran. This is especially time-saving for models with many PA-TBC cells and/or many stress periods. Depending on the model the runtime savings can be around 50 % compared to the flopy writing utilities for the respective input files.
 
+The connection between Python and Fortran is obtained by numpy.f2py ([documentation](https://numpy.org/doc/stable/f2py/index.html)). The Fortran script "mfpatbc/write_spd_fort.f90" needs to be compiled on the users operating system in order for the file writing capabilities of mfpatbc to work. This needs some work on the console or terminal (Considering you probably want this, because you run a quite large model, you're likely in the game, so I guess this is fine ;) ).
+
+Steps:
+1. Open terminal or console of your operating system
+2. Navigate to the folder 'mfpatbc/' that contains the scripts of this module
+3. Compile the Fortran script by entering (if there are any problems on Windows there is some information on numpy.f2py with windows in the [documentation](https://numpy.org/doc/stable/f2py/windows/index.html))
+```bas
+$ python -m numpy.f2py -c write_spd_fort.f90 -m write_spd_fort
+```
+
+
 ## Documentation
 Is provided within the methods, functions, and classes as docstring. Access e.g. via
 ```python
