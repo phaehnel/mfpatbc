@@ -1,6 +1,6 @@
 ### Implementation status of features for different MODFLOW versions
 
-| Feature                                    | MODFLOW-2005            | MODFLOW-2005 with SWI2  | SEAWAT                                | MODFLOW6                | MODFLOW6 with BUY       |
+| Feature                                    | MODFLOW-2005            | MODFLOW-2005 with SWI2  | SEAWAT                                | MODFLOW 6               | MODFLOW 6 with BUY      |
 |--------------------------------------------|-------------------------|-------------------------|---------------------------------------|-------------------------|-------------------------|
 | GHB, PA-TBC, point water heads             | Implemented             | Not required            | Implemented, with options             | Implemented             | Not implemented         |
 | GHB, PA-TBC, fresh water heads             | Not required            | Implemented             | Not required                          | Not required            | Not required            |
