@@ -34,7 +34,7 @@ Steps:
 ```bas
 $ python -m numpy.f2py -c write_spd_fort.f90 -m write_spd_fort
 ```
-The resulting file provides an interface between Python and Fortan so that the subroutine in the Fortran script, that does the heavy lifting, can be accessed just as a normal Python module by mfpatbc. All this is only tested on an Ubuntu system, so errors may (or should?) occure elsewhere.
+The resulting file provides an interface between Python and Fortan so that the subroutine in the Fortran script, that does the heavy lifting, can be accessed just as a normal Python module by mfpatbc. All this is only tested on an Ubuntu system, so errors may (or should?) occur elsewhere.
 
 
 ## Documentation
