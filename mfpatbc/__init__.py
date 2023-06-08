@@ -7,6 +7,7 @@ boundary condition as required by the Python package FloPy.
 
 from .phase_average_tbc import *
 from .modflow_bc import *
+from .write_bc import *
 
 # Load regression model coefficients
 import pandas as pd
@@ -14,8 +15,8 @@ import pandas as pd
 path_module = __file__[:-11]
 
 
-major = 1
-minor = 2
+major = 2
+minor = 0
 micro = 0
 __version__ = f'{major}.{minor}.{micro}'
 
