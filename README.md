@@ -29,7 +29,7 @@ The module has a functionality to write GHB and DRN input files independent of f
 ```python
 >>> from .write_bc import *
 ```
-in the file '__init__.py'.
+in the file '\__init\__.py'.
 
 The connection between Python and Fortran is obtained by numpy.f2py ([documentation](https://numpy.org/doc/stable/f2py/index.html)). The Fortran script "mfpatbc/write_spd_fort.f90" needs to be compiled on the users operating system in order for the file writing capabilities of mfpatbc to work. This needs some work on the console or terminal (Considering you probably want this, because you run a quite large model, you're likely in the game, so I guess this is fine ;) ).
 
