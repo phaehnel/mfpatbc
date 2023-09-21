@@ -3,11 +3,14 @@ Copyright and related rights regarding this work are waived worldwide through th
 https://creativecommons.org/publicdomain/zero/1.0/
 
 This does explicitly exclude:
-* The file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv' which originates from 10.5281/zenodo.6645464 and is associated with the publication 
-**Haehnel et al. (202X)**, which are both licensed under Creative Commons Attribution 4.0 International License (CC BY 4.0). Therefore,
-no requirement exists to cite the Python module 'mfpatbc', but you are required to cite the journal article **Haehnel et al. (202X)** when
-using the module 'mfpatbc' to create a phase-averaged tidal boundary condition that relies on the file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv'. I.e. when the empricial correction function described by **Haehnel et al. (202X)** is used.
+* The file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv' which originates from https://doi.org/10.5281/zenodo.8083519 and is associated with the publication Haehnel et al. (2023), which are both licensed under Creative Commons Attribution 4.0 International License (CC BY 4.0). Therefore,
+no requirement exists to cite the Python module 'mfpatbc', but you are required to cite the journal article Haehnel et al. (2023) when
+using the module 'mfpatbc' to create a phase-averaged tidal boundary condition that relies on the file 'mfpatbc/coef_lm_sim-slopesteady_nwt.csv'. I.e. when the empricial correction function described by Haehnel et al. (2023) is used.
 * Any third-party data or software made available in the folders 'bin' and 'examples'. Their according license status is outlined there.
+
+Haehnel et al. (2023) refers to
+> Haehnel, P., Greskowiak, J., Robinson, C. E., Schuett, M., & Massmann, G. (2023). Efficient representation of transient tidal overheight in a coastal groundwater flow model using a phase-averaged tidal boundary condition. Advances in Water Resources, 104538. https://doi.org/10.1016/j.advwatres.2023.104538
+
 
 ## CC0 1.0 Summary
 ### No copyright
