@@ -3,13 +3,15 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8083502.svg)](https://doi.org/10.5281/zenodo.8083502)
 
 ## Introduction
-mfpatbc is a Python module to create input data for a phase-averaged tidal boundary (PA-TBC) condition for MODFLOW models created with [flopy](https://github.com/modflowpy/flopy). The PA-TBC is explained in detail in **Haehnel et al. (202X)**.
+mfpatbc is a Python module to create input data for a phase-averaged tidal boundary (PA-TBC) condition for MODFLOW models created with [flopy](https://github.com/modflowpy/flopy). The PA-TBC is explained in detail in
+
+> Haehnel, P., Greskowiak, J., Robinson, C. E., Schuett, M., & Massmann, G. (2023). Efficient representation of transient tidal overheight in a coastal groundwater flow model using a phase-averaged tidal boundary condition. Advances in     Water Resources, 104538. https://doi.org/10.1016/j.advwatres.2023.104538
 
 Supported versions of MODFLOW are MODFLOW-2005, MODFLOW-NWT, SEAWAT, and MODFLOW 6 (constant density). The module defines stress period based input data for the General Head Boundary (GHB) and the Drainage Boundary (Package) as required for the PA-TBC. For MODFLOW-2005, defining freshwater heads for the GHB package as required by the Seawater Intrusion Package (SWI2) is supported.
 
 For use with SEAWAT, the GHB input for the Source and Sink Mixing (SSM) package of MT3DMS can be defined.
 
-Should you find any error or have ideas for improvements, I would be very grateful if you let me know in 'Issues' or 'Discussions'.
+Should you find any error or have ideas for improvements, I would be very grateful if you let me know in 'Issues' or 'Discussions' or write me an Email (patrick.haehnel@uol.de).
 
 ## Installation
 ### Python module 
@@ -32,7 +34,7 @@ The module has a functionality to write GHB and DRN input files independent of f
 ```
 in the file '\__init\__.py'.
 
-The connection between Python and Fortran is obtained by numpy.f2py ([documentation](https://numpy.org/doc/stable/f2py/index.html)). The Fortran script "mfpatbc/write_spd_fort.f90" needs to be compiled on the users operating system in order for the file writing capabilities of mfpatbc to work. This needs some work on the console or terminal (Considering you probably want this, because you run a quite large model, you're likely in the game, so I guess this is fine ;) ).
+The connection between Python and Fortran is obtained by numpy.f2py ([documentation](https://numpy.org/doc/stable/f2py/index.html)). The Fortran script "mfpatbc/write_spd_fort.f90" needs to be compiled on the users operating system in order for the file writing capabilities of mfpatbc to work. This needs some work on the console or terminal.
 
 Steps:
 1. Open terminal or console of your operating system
@@ -57,6 +59,3 @@ The folder 'examples' provides Jupyter Notebooks showcasing the use of the modul
 
 ## How to cite
 Haehnel, Patrick (2023). mfpatbc v2.0.0 [Software] URL: https://github.com/phaehnel/mfpatbc
-
-## References
-**Haehnel et al. (202X)**
